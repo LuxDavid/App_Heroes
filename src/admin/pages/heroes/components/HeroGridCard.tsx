@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import type { Hero } from '../types/gero-interface';
+import type { Hero } from '../types/hero-interface';
 import { useNavigate } from 'react-router';
 
 interface Props {
