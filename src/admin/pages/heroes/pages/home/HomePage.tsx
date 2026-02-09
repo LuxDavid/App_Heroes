@@ -25,7 +25,7 @@ export const HomePage = () => {
     return validTabs.includes(activeTab) ? activeTab : 'all';
   }, [activeTab]);
 
-  const {data: heroesResponse}= usePaginatedHero(+page, +limit)
+  const {data: heroesResponse}= usePaginatedHero(+page, +limit, category)
 
   const {data:summary} = useHeroSummary();
 
@@ -49,6 +49,8 @@ export const HomePage = () => {
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="all" onClick={() => setSearchParams((prev) => {
               prev.set('tab', 'all');
+              prev.set('category', 'all');
+              prev.set('page', '1');
               return prev
             })}>
               All Characters {summary?.totalHeroes}
@@ -67,14 +69,19 @@ export const HomePage = () => {
 
             <TabsTrigger value="heroes" onClick={() => setSearchParams((prev) => {
               prev.set('tab', 'heroes');
+              prev.set('category', 'hero');
+              prev.set('page', '1');
               return prev
             })}>
               Heroes {summary?.heroCount}
             </TabsTrigger>
+
             <TabsTrigger
               value="villains"
               onClick={() => setSearchParams((prev) => {
               prev.set('tab', 'villains');
+              prev.set('category', 'villain');
+              prev.set('page', '1');
               return prev
             })}
             >
@@ -94,12 +101,12 @@ export const HomePage = () => {
           <TabsContent value="heroes">
             {/* Mostrar todos los héroes */}
             <h1>Héroes</h1>
-            <HeroGrid heroes={[]} />
+            <HeroGrid heroes={heroesResponse?.heroes ?? []} />
           </TabsContent>
           <TabsContent value="villains">
             {/* Mostrar todos los Villanos */}
             <h1>Villanos</h1>
-            <HeroGrid heroes={[]}/>
+            <HeroGrid heroes={heroesResponse?.heroes ?? []}/>
           </TabsContent>
           
         </Tabs>
