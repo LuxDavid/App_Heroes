@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { FavoriteHeroContext, FavoriteHeroProvider } from "./FavoriteHeroContext";
 import { use } from "react";
 import type { Hero } from "../types/hero-interface";
@@ -9,6 +9,14 @@ const mockHero= {
     id:'1',
     name: 'batman'
 } as Hero;
+
+const localStorageMock= {
+    getItem: vi.fn(),
+    setItem: vi.fn(),
+    clear: vi.fn()
+}
+
+Object.defineProperty(window, 'localStorage', {value:localStorageMock});
 
 const TestComponent = () => {
     const { favoriteCount, favorites, isFavorite, toggleFavorite } = use(FavoriteHeroContext);
@@ -46,9 +54,11 @@ const renderContextTest= () => {
 }
 
 describe('FavoriteHeroContext', () => {
-    afterEach(() => {
-        localStorage.clear();
-    });
+    // afterEach(() => {
+    //     localStorage.clear();
+    // });
+
+    beforeEach(() => vi.clearAllMocks());
 
     test('should initialize with default values', () => {
         renderContextTest();
@@ -64,17 +74,18 @@ describe('FavoriteHeroContext', () => {
 
         fireEvent.click(button);
 
-        // screen.debug();
-        // console.log(localStorage.getItem('favorites')); 
-
+        expect(screen.getByTestId('favorite-count').textContent).toBe('1');
         expect(screen.getByTestId('is-favorite').textContent).toBe('true');
         expect(screen.getByTestId('hero-1').textContent).toBe('batman');
-        expect(localStorage.getItem('favorites')).toBe(
-        '[{"id":"1","name":"batman"}]');
+        expect(localStorageMock.setItem).toHaveBeenCalled();
+        expect(localStorageMock.setItem).toHaveBeenCalledWith(
+            'favorites',
+            '[{"id":"1","name":"batman"}]'
+        );
     });
 
     test('should remove hero to favorites wheb  toogleFavorite is called', () => {
-        localStorage.setItem('favorites', JSON.stringify([mockHero]));
+        localStorageMock.getItem.mockReturnValue(JSON.stringify([mockHero]));
          renderContextTest();
 
             expect(screen.getByTestId('favorite-count').textContent).toBe('1');
@@ -89,7 +100,9 @@ describe('FavoriteHeroContext', () => {
             expect(screen.getByTestId('favorite-count').textContent).toBe('0');
             expect(screen.getByTestId('is-favorite').textContent).toBe('false');
             expect(screen.queryByTestId('hero-1')).toBeNull();
-   
+
+            expect(localStorageMock.setItem).toHaveBeenCalled();
+            expect(localStorageMock.setItem).toHaveBeenCalledWith('favorites', '[]');
     });
 
 });
